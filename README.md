@@ -15,6 +15,9 @@ chmod 777 -R app/console/runtime
 1. Initialize config: ```./init --env=Development --overwrite=All --delete=All```
 1. Apply database migrations: ```./yii migrate```
 
+The website now is available by http://localhost:8100/
+To use it, you need to Signup and then to Login
+
 ### Commands available inside the docker container "php"
 * ```./yii prize/deliver-thing 5``` - set status to Delivered for the prize thing with ID=5
 * ```./yii prize/deliver-money-batch 3``` - deliver 3 oldest money prizes
