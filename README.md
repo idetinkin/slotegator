@@ -1,4 +1,4 @@
-# Slotegator
+# Slotegrator
 
 ### How to run
 1. Clone the source: ```git clone https://github.com/idetinkin/slotegator ./```
