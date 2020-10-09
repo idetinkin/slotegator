@@ -1,0 +1,47 @@
+version: '3'
+
+networks:
+  default:
+    driver: bridge
+
+services:
+
+  web:
+   build: ./containers/nginx
+   ports:
+    - 8100:80
+   networks:
+    - default
+   volumes:
+    - ./logs/nginx:/etc/logs/nginx
+    - ./containers/nginx/conf:/etc/nginx/conf.d
+    - ./app:/var/www:rw
+   environment:
+    - NGINX_HOST=localhost
+    - NGINX_PORT=80
+   command: nginx -g "daemon off;"
+   links:
+    - php
+    - db
+
+  php:
+   build: ./containers/fpm
+   networks:
+    - default
+   volumes:
+    - ./app:/var/www:rw
+   links:
+    - db
+
+  db:
+   image: postgres:10.5
+   ports:
+    - 5432:5432
+   networks:
+    - default
+   volumes:
+    - ./database/postgres:/data/postgres
+   environment:
+    POSTGRES_USER: slotegator
+    POSTGRES_PASSWORD: slotegator
+    PGDATA : /data/postgres
