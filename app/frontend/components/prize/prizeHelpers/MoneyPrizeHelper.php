@@ -7,6 +7,7 @@ use common\models\PrizeStatus;
 use common\models\PrizeType;
 use Yii;
 use yii\base\InvalidArgumentException;
+use yii\db\Exception as DbException;
 
 class MoneyPrizeHelper extends AbstractPrizeHelper implements InterfaceConvertToPoints
 {
@@ -94,6 +95,13 @@ class MoneyPrizeHelper extends AbstractPrizeHelper implements InterfaceConvertTo
     public function getConvertToPointsCoefficient()
     {
         return Yii::$app->params['prize']['money']['convertToPointsCoefficient'];
+    }
+
+    public function deliver()
+    {
+        //TODO HTTP request to the bank API
+        sleep(1);
+        parent::deliver();
     }
 
 

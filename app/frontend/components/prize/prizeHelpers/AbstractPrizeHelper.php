@@ -5,6 +5,7 @@ namespace frontend\components\prize\prizeHelpers;
 use common\models\Prize;
 use common\models\PrizeStatus;
 use yii\base\BaseObject;
+use yii\db\Exception as DbException;
 
 abstract class AbstractPrizeHelper extends BaseObject
 {
@@ -66,5 +67,13 @@ abstract class AbstractPrizeHelper extends BaseObject
 
     public function freePrize()
     {
+    }
+
+    public function deliver()
+    {
+        $this->prize->status_id = PrizeStatus::STATUS_DELIVERED;
+        if (!$this->prize->save()) {
+            throw new DbException('Cannot deliver the prize', $this->prize->errors);
+        }
     }
 }
