@@ -1,7 +1,7 @@
 # Slotegrator
 
 ### How to run
-1. Clone the source: ```git clone https://github.com/idetinkin/slotegator ./```
+1. Clone the source: ```git clone https://github.com/idetinkin/slotegrator ./```
 2. Change permissions for runtime folders: 
 ```
 chmod 777 -R app/frontend/runtime
