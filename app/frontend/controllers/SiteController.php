@@ -5,6 +5,7 @@ use frontend\models\ResendVerificationEmailForm;
 use frontend\models\VerifyEmailForm;
 use Yii;
 use yii\base\InvalidArgumentException;
+use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -77,7 +78,19 @@ class SiteController extends Controller
         if (Yii::$app->user->isGuest) {
             return $this->render('index');
         } else {
-            return $this->render('index_signed');
+            $prizesQuery = Yii::$app->user->identity->getPrizes();
+
+            return $this->render('index_signed', [
+                'prizesDataProvider' => new ActiveDataProvider([
+                    'query' => $prizesQuery,
+                    'sort' => [
+                        'defaultOrder' => [
+                            'created_at' => SORT_DESC,
+                            'id' => SORT_DESC,
+                        ]
+                    ],
+                ]),
+            ]);
         }
     }
 

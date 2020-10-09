@@ -2,7 +2,15 @@
 
 namespace common\models;
 
+use frontend\components\prize\PrizeGenerator;
+use frontend\components\prize\prizeHelpers\AbstractPrizeHelper;
+use frontend\components\prize\prizeHelpers\MoneyPrizeHelper;
+use frontend\components\prize\prizeHelpers\PointsPrizeHelper;
+use frontend\components\prize\prizeHelpers\ThingsPrizeHelper;
+use Yii;
+use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Exception;
 
 /**
  * This is the model class for table "prize".
@@ -18,6 +26,7 @@ use yii\behaviors\TimestampBehavior;
  * @property PrizeStatus $status
  * @property PrizeType $type
  * @property User $user
+ * @property AbstractPrizeHelper $prizeHelper
  */
 class Prize extends \yii\db\ActiveRecord
 {
@@ -98,6 +107,43 @@ class Prize extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    public static function createNewPrize()
+    {
+        $prizeGenerator = new PrizeGenerator();
+        $prize = $prizeGenerator->generatePrize(Yii::$app->user->identity);
+
+        if (!$prize->save()) {
+            throw new Exception('Cannot save the prize', $prize->errors);
+        }
+
+        return $prize;
+    }
+
+    public function getPrizeHelper()
+    {
+        switch ($this->type_id) {
+            case PrizeType::TYPE_MONEY: return new MoneyPrizeHelper(['prize' => $this]);
+            case PrizeType::TYPE_POINTS: return new PointsPrizeHelper(['prize' => $this]);
+            case PrizeType::TYPE_THINGS: return new ThingsPrizeHelper(['prize' => $this]);
+            default: throw new InvalidArgumentException("The prize type {$this->type_id} has not been configured yet");
+        }
+    }
+
+    public function beforeSave($insert)
+    {
+        if ($insert) {
+            $this->prizeHelper->reservePrize();
+        }
+        return parent::beforeSave($insert);
+    }
+
+    public function beforeDelete()
+    {
+        $this->prizeHelper->freePrize();
+
+        return parent::beforeDelete();
     }
 
 
