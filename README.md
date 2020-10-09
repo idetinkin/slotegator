@@ -16,6 +16,7 @@ chmod 777 -R app/console/runtime
 1. Apply database migrations: ```./yii migrate```
 
 The website now is available by http://localhost:8100/
+
 To use it, you need to Signup and then to Login
 
 ### Commands available inside the docker container "php"
