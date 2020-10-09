@@ -2,6 +2,7 @@
 
 namespace frontend\components\prize\prizeHelpers;
 
+use common\models\PrizeStatus;
 use common\models\PrizeType;
 use Yii;
 
@@ -18,6 +19,14 @@ class PointsPrizeHelper extends AbstractPrizeHelper
         $to = Yii::$app->params['prize']['points']['to'];
         return rand($from, $to);
     }
+
+    public static function generatePrize()
+    {
+        $prize = parent::generatePrize();
+        $prize->status_id = PrizeStatus::STATUS_DELIVERED;
+        return $prize;
+    }
+
 
     public static function getPrizeType()
     {
