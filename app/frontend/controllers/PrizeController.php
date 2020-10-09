@@ -69,4 +69,26 @@ class PrizeController extends Controller
         Yii::$app->session->setFlash('success', 'The prize was deleted');
         return $this->goBack();
     }
+
+    public function actionConvert($id)
+    {
+        /** @var Prize $prize */
+        $prize = Yii::$app->user->identity->getPrizes()
+            ->andWhere([
+                'id' => $id
+            ])
+            ->one();
+
+        if (empty($prize)) {
+            throw new NotFoundHttpException("Prize with ID = $id was not found");
+        }
+
+        if (!$prize->canConvertToPoints) {
+            throw new InvalidArgumentException('Prize cannot be converted to points');
+        }
+
+        $prize->convertToPoints();
+        Yii::$app->session->setFlash('success', 'The prize was converted to points');
+        return $this->goBack();
+    }
 }

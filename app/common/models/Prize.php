@@ -4,6 +4,7 @@ namespace common\models;
 
 use frontend\components\prize\PrizeGenerator;
 use frontend\components\prize\prizeHelpers\AbstractPrizeHelper;
+use frontend\components\prize\prizeHelpers\InterfaceConvertToPoints;
 use frontend\components\prize\prizeHelpers\MoneyPrizeHelper;
 use frontend\components\prize\prizeHelpers\PointsPrizeHelper;
 use frontend\components\prize\prizeHelpers\ThingsPrizeHelper;
@@ -27,6 +28,7 @@ use yii\db\Exception;
  * @property PrizeType $type
  * @property User $user
  * @property AbstractPrizeHelper $prizeHelper
+ * @property boolean $canConvertToPoints
  */
 class Prize extends \yii\db\ActiveRecord
 {
@@ -119,6 +121,24 @@ class Prize extends \yii\db\ActiveRecord
         }
 
         return $prize;
+    }
+
+    public function getCanConvertToPoints()
+    {
+        $prizeHelper = $this->prizeHelper;
+        if ($prizeHelper instanceof InterfaceConvertToPoints) {
+            return $prizeHelper->canConvertToPoints();
+        }
+        return false;
+    }
+
+    public function convertToPoints()
+    {
+        $prizeHelper = $this->prizeHelper;
+        if (!$prizeHelper instanceof InterfaceConvertToPoints || !$prizeHelper->canConvertToPoints()) {
+            throw new InvalidArgumentException('Cannot convert the prize to points');
+        }
+        $prizeHelper->convertToPoints();
     }
 
     public function getPrizeHelper()

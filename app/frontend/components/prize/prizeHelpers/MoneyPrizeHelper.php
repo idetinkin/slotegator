@@ -3,11 +3,12 @@
 namespace frontend\components\prize\prizeHelpers;
 
 use common\models\KeyValueStorage;
+use common\models\PrizeStatus;
 use common\models\PrizeType;
 use Yii;
 use yii\base\InvalidArgumentException;
 
-class MoneyPrizeHelper extends AbstractPrizeHelper
+class MoneyPrizeHelper extends AbstractPrizeHelper implements InterfaceConvertToPoints
 {
     public static function isAvailable()
     {
@@ -51,6 +52,48 @@ class MoneyPrizeHelper extends AbstractPrizeHelper
         $moneyLeft = KeyValueStorage::getValue('money_left');
 
         KeyValueStorage::setValue('money_left', (string) ($moneyLeft + $this->getValue())); //TODO possible race condition
+    }
+
+    public function canConvertToPoints()
+    {
+        return $this->prize->status_id != PrizeStatus::STATUS_DELIVERED
+            && $this->getValue() >= $this->getConvertToPointsCoefficient();
+    }
+
+    public function convertToPoints()
+    {
+        if (!$this->canConvertToPoints()) {
+            throw new InvalidArgumentException('Cannot convert the prize to points');
+        }
+
+        $tran = Yii::$app->db->beginTransaction();
+
+        try {
+            $this->freePrize();
+
+            $this->prize->attributes = [
+                'type_id' => PrizeType::TYPE_POINTS,
+                'value' => $this->calcPointsFromMoney(),
+            ];
+            if (!$this->prize->save()) {
+                throw new DbException('Cannot convert the prize to points', $this->prize->errors);
+            }
+        } catch (\Exception $e) {
+            $tran->rollBack();
+            throw $e;
+        }
+
+        $tran->commit();
+    }
+
+    public function calcPointsFromMoney()
+    {
+        return floor($this->getValue() / $this->getConvertToPointsCoefficient());
+    }
+
+    public function getConvertToPointsCoefficient()
+    {
+        return Yii::$app->params['prize']['money']['convertToPointsCoefficient'];
     }
 
 

@@ -32,10 +32,25 @@ $this->title = 'Signed user homepage';
                     [
                         'class' => 'yii\grid\ActionColumn',
                         'controller' => 'prize',
-                        'template' => '{delete}',
+                        'template' => '{delete} {convert}',
+                        'buttons' => [
+                            'convert' => function ($url, $model, $key) {
+                                $icon = Html::tag('span', '', ['class' => "glyphicon glyphicon-circle-arrow-right"]);
+                                return Html::a($icon, $url, [
+                                    'title' => 'Convert to points',
+                                    'aria-label' => 'Convert to points',
+                                    'data-pjax' => '0',
+                                    'data-confirm' => Yii::t('yii', 'Are you sure you want to convert this price to points?'),
+                                    'data-method' => 'post',
+                                ]);
+                            }
+                        ],
                         'visibleButtons' => [
                             'delete' => function (\common\models\Prize $model, $key, $index) {
                                 return $model->prizeHelper->canDeletePrize();
+                            },
+                            'convert' => function(\common\models\Prize $model, $key, $index) {
+                                return $model->canConvertToPoints;
                             },
                         ]
                     ],
